@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.LedgerMapper">
+
+	<resultMap id="LedgerMap" type="com.eggmoney.payv.infrastructure.mybatis.record.LedgerRecord">
+		<id property="ledgerId" column="ledger_Id" />
+		<result property="ownerId" column="owner_Id" />
+		<result property="name" column="name" />
+		<result property="createdAt" column="created_at" javaType="java.time.LocalDateTime" />
+	</resultMap>
+
+	<select id="selectById" parameterType="string" resultMap="LedgerMap">
+		SELECT LEDGER_ID, OWNER_ID, NAME, CREATED_AT
+		FROM LEDGER
+		WHERE LEDGER_ID = #{ledgerId}
+	</select>
+
+	<select id="selectListByOwner" parameterType="string" resultMap="LedgerMap">
+		SELECT LEDGER_ID, OWNER_ID, NAME, CREATED_AT
+		FROM LEDGER
+		WHERE OWNER_ID = #{ownerId}
+		ORDER BY CREATED_AT DESC, LEDGER_ID
+	</select>
+
+	<select id="existsByOwnerAndName" resultType="int">
+		SELECT 1 FROM LEDGER
+		WHERE OWNER_ID = #{ownerId}
+		AND NAME = #{name}
+	</select>
+
+	<insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.LedgerRecord">
+		INSERT INTO LEDGER (LEDGER_ID, OWNER_ID, NAME)
+		VALUES (#{ledgerId}, #{ownerId}, #{name})
+	</insert>
+
+	<update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.LedgerRecord">
+		UPDATE LEDGER SET 
+			NAME = #{name}
+		WHERE LEDGER_ID = #{ledgerId}
+	</update>
+
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="[%d{HH:mm:ss.SSS}] %-5level %logger - %msg%n"/>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+    <!-- 컨트롤러 로그: INFO 이상 -->
+    <Logger name="com.eggmoney.payv.presentation" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <!-- (선택) log4jdbc: SQL/결과 테이블 로깅 -->
+    <Logger name="jdbc.sqlonly" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+    <Logger name="jdbc.resultsettable" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Root level="info">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.UserMapper">
+
+	<resultMap id="UserMap" type="com.eggmoney.payv.infrastructure.mybatis.record.UserRecord">
+		<id property="userId" column="USER_ID" />
+		<result property="email" column="EMAIL" />
+		<result property="password" column="PASSWORD" />
+		<result property="name" column="NAME" />
+		<result property="createdAt" column="CREATED_AT" javaType="java.time.LocalDateTime" />
+	</resultMap>
+
+	<select id="selectById" parameterType="string" resultMap="UserMap">
+		SELECT USER_ID, EMAIL, PASSWORD, NAME, CREATED_AT
+		FROM USERS
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<select id="selectByEmail" parameterType="string" resultMap="UserMap">
+		SELECT USER_ID, EMAIL, PASSWORD, NAME, CREATED_AT
+		FROM USERS
+		WHERE EMAIL = #{email}
+	</select>
+
+	<insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.UserRecord">
+		INSERT INTO USERS (
+			USER_ID, 
+			EMAIL, 
+			PASSWORD, 
+			NAME,
+			CREATED_AT
+		)
+		VALUES (
+			#{userId}, 
+			#{email}, 
+			#{password}, 
+			#{name},
+			#{createdAt}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.UserRecord">
+		UPDATE USERS SET 
+			EMAIL = #{email},
+			NAME = #{name}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+
+</mapper>

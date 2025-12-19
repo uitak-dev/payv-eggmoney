@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.CommentMapper">
+
+	<!-- 컬럼 목록 -->
+	<sql id="Comment_Columns">
+		board_id, user_id, content, visibility, created_at, updated_at
+	</sql>
+
+	<!-- resultMap: snake_case ↔ camelCase -->
+	<resultMap id="CommentRecordMap"
+		type="com.eggmoney.payv.infrastructure.mybatis.record.CommentRecord">
+		<id property="commentId" column="comment_id" />
+		<result property="boardId" column="board_id" />
+		<result property="userId" column="user_id" />
+		<result property="content" column="content" />
+		<result property="visibility" column="visibility" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+
+	<!-- 단건 조회 -->
+	<select id="selectById" resultMap="CommentRecordMap">
+		SELECT comment_id, board_id,
+		user_id, content, visibility, created_at,
+		updated_at
+		FROM comments
+		WHERE
+		comment_id = #{commentId}
+	</select>
+
+	<!-- 특정 사용자의 모든 댓글 조회 -->
+	<select id="selectByBoard" resultMap="CommentRecordMap">
+		SELECT comment_id,
+		board_id, user_id, content, visibility, created_at,
+		updated_at
+		FROM
+		comments
+		WHERE board_id = #{boardId}
+		ORDER BY created_at ASC
+	</select>
+
+	<!-- 전체 목록 -->
+	<select id="selectAll" resultMap="CommentRecordMap">
+		SELECT
+		<include refid="Comment_Columns" />
+		FROM board
+		ORDER BY created_at DESC
+	</select>
+
+	<!-- INSERT -->
+	<insert id="insert">
+		INSERT INTO comments (comment_id, board_id, user_id,
+		content, visibility,
+		created_at, updated_at)
+		VALUES (#{commentId},
+		#{boardId}, #{userId}, #{content}, #{visibility},
+		#{createdAt},
+		#{updatedAt})
+	</insert>
+
+	<!-- UPDATE (PK 기준) -->
+	<update id="update">
+		UPDATE comments
+		SET content = #{content},
+		visibility =
+		#{visibility},
+		updated_at = #{updatedAt}
+		WHERE comment_id = #{commentId}
+	</update>
+
+	<!-- 삭제 -->
+	<delete id="delete">
+		DELETE FROM comments WHERE comment_id = #{commentId}
+	</delete>
+
+</mapper>

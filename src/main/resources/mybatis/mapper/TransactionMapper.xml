@@ -1,0 +1,263 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.TransactionMapper">
+
+	<resultMap id="TransactionMap" type="com.eggmoney.payv.infrastructure.mybatis.record.TransactionRecord">
+		<id property="transactionId" column="TRANSACTION_ID" />
+		<result property="ledgerId" column="LEDGER_ID" />
+		<result property="accountId" column="ACCOUNT_ID" />
+		<result property="date" column="TRANSACTION_DATE" jdbcType="DATE" />
+		<result property="type" column="TYPE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="categoryId" column="CATEGORY_ID" />
+		<result property="memo" column="MEMO" />
+		<result property="posted" column="POSTED" />
+		<result property="postedAt" column="POSTED_AT" jdbcType="TIMESTAMP" />
+		<result property="createdAt" column="CREATED_AT" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<select id="selectById" parameterType="string" resultMap="TransactionMap">
+		SELECT 
+			TRANSACTION_ID, 
+			LEDGER_ID, 
+			ACCOUNT_ID, 
+			TRANSACTION_DATE, 
+			TYPE, 
+			AMOUNT, 
+			CATEGORY_ID, 
+			MEMO, 
+			POSTED, 
+			POSTED_AT, 
+			CREATED_AT
+		FROM 
+			TRANSACTION
+		WHERE TRANSACTION_ID = #{transactionId}
+		AND ROWNUM = 1
+	</select>
+
+	<insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.TransactionRecord">
+		INSERT INTO TRANSACTION (
+			TRANSACTION_ID, 
+			LEDGER_ID, 
+			ACCOUNT_ID, 
+			TRANSACTION_DATE, 
+			TYPE, 
+			AMOUNT, 
+			CATEGORY_ID, 
+			MEMO,
+			POSTED, 
+			POSTED_AT, 
+			CREATED_AT
+		) VALUES (
+			#{transactionId}, 
+			#{ledgerId}, 
+			#{accountId}, 
+			#{date}, 
+			#{type}, 
+			#{amount},
+			#{categoryId}, 
+			#{memo, jdbcType=VARCHAR}, 
+			NVL(#{posted}, 'N'), 
+			#{postedAt, jdbcType=TIMESTAMP}, 
+			NVL(#{createdAt}, SYSTIMESTAMP)
+		)
+	</insert>
+
+	<update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.TransactionRecord">
+		UPDATE TRANSACTION SET 
+			LEDGER_ID = #{ledgerId},
+			ACCOUNT_ID = #{accountId},
+			TRANSACTION_DATE = #{date},
+			TYPE = #{type},
+			AMOUNT = #{amount},
+			CATEGORY_ID= #{categoryId},
+			MEMO = #{memo, jdbcType=VARCHAR}, 
+			POSTED = NVL(#{posted}, 'N'),
+			POSTED_AT = #{postedAt, jdbcType=TIMESTAMP}
+		WHERE 
+			TRANSACTION_ID = #{transactionId}
+	</update>
+
+	<delete id="delete" parameterType="string">
+		DELETE FROM TRANSACTION 
+		WHERE TRANSACTION_ID = #{transactionId}
+	</delete>
+
+	<!-- 거래 내역 조회 -->
+	<select id="selectByLedgerAndDateRange" resultMap="TransactionMap">
+		SELECT * 
+		FROM (
+			SELECT 
+				t.*, 
+				ROWNUM rn 
+			FROM (
+				SELECT 
+					TRANSACTION_ID, 
+					LEDGER_ID, 
+					ACCOUNT_ID, 
+					TRANSACTION_DATE, 
+					TYPE, 
+					AMOUNT, 
+					CATEGORY_ID, 
+					MEMO, 
+					POSTED, 
+					POSTED_AT, 
+					CREATED_AT
+				FROM 
+					TRANSACTION
+				WHERE 
+					LEDGER_ID = #{ledgerId}
+		<![CDATA[
+				AND TRANSACTION_DATE >= #{from}
+				AND TRANSACTION_DATE < #{to}
+				ORDER BY 
+					TRANSACTION_DATE DESC, TRANSACTION_ID DESC
+			) t
+			WHERE 
+				ROWNUM <= (#{offset} + #{limit})
+		)
+		WHERE rn > #{offset}
+		]]>
+	</select>
+
+	<!-- 거래 내역 필터링 조회: count 조회. -->
+	<select id="countByCond" parameterType="map" resultType="long">
+		SELECT COUNT(*)
+		FROM TRANSACTION t
+		WHERE 
+			t.LEDGER_ID = #{ledgerId} AND 			
+			t.TRANSACTION_DATE &gt;= #{cond.start, jdbcType=DATE} AND 
+			t.TRANSACTION_DATE &lt; #{cond.end, jdbcType=DATE} + 1
+		<if test="cond.accountId != null and cond.accountId != ''">
+			AND t.ACCOUNT_ID = #{cond.accountId}
+		</if>
+		<if test="cond.resolvedCategoryIds != null and cond.resolvedCategoryIds.size() > 0">
+			AND t.CATEGORY_ID IN
+			<foreach item="cid" collection="cond.resolvedCategoryIds" open="(" separator="," close=")">
+				#{cid}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 거래 내역 필터링 조회: 조건 필터링 조회. -->
+	<select id="listByCond" parameterType="map" resultMap="TransactionMap">
+		SELECT *
+		FROM (
+			SELECT
+				TRANSACTION_ID, 
+				LEDGER_ID, 
+				ACCOUNT_ID, 
+				TRANSACTION_DATE, 
+				TYPE,
+				AMOUNT,
+				TO_CHAR(CATEGORY_ID) AS CATEGORY_ID,
+				MEMO,
+				POSTED,
+				POSTED_AT,
+				CREATED_AT,
+				ROW_NUMBER() OVER (ORDER BY TRANSACTION_DATE DESC, TRANSACTION_ID DESC) AS RN
+			FROM 
+				TRANSACTION
+			WHERE 
+				LEDGER_ID = #{ledgerId} AND 
+				TRANSACTION_DATE &gt;= #{cond.start, jdbcType=DATE} AND 
+				TRANSACTION_DATE &lt; #{cond.end, jdbcType=DATE} + 1
+			<if test="cond.accountId != null and cond.accountId != ''">
+				AND ACCOUNT_ID = #{cond.accountId}
+			</if>
+			<if test="cond.resolvedCategoryIds != null and cond.resolvedCategoryIds.size() > 0">
+				AND CATEGORY_ID IN
+				<foreach item="cid" collection="cond.resolvedCategoryIds" open="(" separator="," close=")">
+					#{cid}
+				</foreach>
+			</if>
+		)
+		WHERE RN &gt; #{offset}
+		AND RN &lt;= #{offset} + #{limit}
+	</select>
+	
+	<!-- 자산별 조회 -->
+	<select id="selectByLedgerAndAccount" resultMap="TransactionMap">
+		SELECT *
+		FROM (
+			SELECT t.*, ROWNUM rn
+			FROM (
+				SELECT 
+					TRANSACTION_ID, 
+					LEDGER_ID, 
+					ACCOUNT_ID, 
+					TRANSACTION_DATE, 
+					TYPE,
+					AMOUNT, 
+					CATEGORY_ID, 
+					MEMO, 
+					POSTED, 
+					POSTED_AT, 
+					CREATED_AT
+				FROM 
+					TRANSACTION
+				WHERE 
+					LEDGER_ID = #{ledgerId} AND 
+					ACCOUNT_ID = #{accountId}
+				ORDER BY 
+					TRANSACTION_DATE DESC, TRANSACTION_ID DESC
+			) t
+			<![CDATA[
+			WHERE 
+				ROWNUM <= (#{offset} + #{limit})
+		)
+		WHERE 
+			rn > #{offset}
+		]]>
+	</select>
+
+	<!-- 카테고리 집합 조회(페이징) -->
+	<select id="selectByLedgerAndCategoryIds" resultMap="TransactionMap">
+		<choose>
+			<when test="categoryIds != null and categoryIds.size() > 0">
+				SELECT *
+				FROM (
+					SELECT t.*, ROWNUM rn
+					FROM (
+						SELECT 
+							TRANSACTION_ID, 
+							LEDGER_ID, 
+							ACCOUNT_ID, 
+							TRANSACTION_DATE, 
+							TYPE, 
+							AMOUNT, 
+							CATEGORY_ID, 
+							MEMO, 
+							POSTED, 
+							POSTED_AT, 
+							CREATED_AT
+						FROM 
+							TRANSACTION
+						WHERE 
+							LEDGER_ID = #{ledgerId} AND 
+							CATEGORY_ID IN
+							<foreach collection="categoryIds" item="cid" open="(" separator="," close=")">
+								#{cid}
+							</foreach>
+						ORDER BY 
+							TRANSACTION_DATE DESC, TRANSACTION_ID DESC
+					) t
+					<![CDATA[
+					WHERE 
+						ROWNUM <= (#{offset} + #{limit})
+				)
+				WHERE rn > #{offset}
+				]]>
+			</when>
+			<otherwise>
+				<!-- 카테고리 목록이 비면 결과 없음 -->
+				SELECT 
+					TRANSACTION_ID, LEDGER_ID, ACCOUNT_ID, TRANSACTION_DATE,
+					TYPE, AMOUNT, CATEGORY_ID, MEMO, POSTED, POSTED_AT, CREATED_AT
+				FROM TRANSACTION
+				WHERE 1 = 0
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

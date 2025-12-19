@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.BoardMapper">
+
+    <!-- resultMap: snake_case ↔ camelCase -->
+    <resultMap id="BoardRecordMap"
+        type="com.eggmoney.payv.infrastructure.mybatis.record.BoardRecord">
+        <id property="boardId" column="board_id" />
+        <result property="userId" column="user_id" />
+        <result property="type" column="type" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="visibility" column="visibility" />
+        <result property="viewCount" column="view_count" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="email" column="email"/>
+    </resultMap>
+
+    <!-- 단건 조회 -->
+    <select id="selectById" parameterType="string" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        WHERE b.board_id = #{boardId}
+    </select>
+
+    <!-- 사용자별 목록 -->
+    <select id="selectListByUser" parameterType="string" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+    </select>
+
+    <!-- 전체 목록 -->
+    <select id="selectAll" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM board
+    </select>
+
+    <!-- 페이징 -->
+    <select id="selectByPage" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        ORDER BY b.created_at DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 제목으로 검색 -->
+    <select id="selectByTitle" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        WHERE b.title LIKE '%' || #{keyword} || '%'
+        ORDER BY b.created_at DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 내용으로 검색 -->
+    <select id="selectByContent" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        WHERE b.content LIKE '%' || #{keyword} || '%'
+        ORDER BY b.created_at DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 작성자(email)로 검색 -->
+    <select id="selectByAuthor" resultMap="BoardRecordMap">
+        SELECT b.*, u.email
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        WHERE u.email LIKE '%' || #{keyword} || '%'
+        ORDER BY b.created_at DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 제목으로 검색된 게시글 수 -->
+    <select id="countByTitle" resultType="int">
+        SELECT COUNT(*) FROM board
+        WHERE title LIKE '%' || #{keyword} || '%'
+    </select>
+
+    <!-- 내용으로 검색된 게시글 수 -->
+    <select id="countByContent" resultType="int">
+        SELECT COUNT(*) FROM board
+        WHERE content LIKE '%' || #{keyword} || '%'
+    </select>
+
+    <!-- 작성자(email)로 검색된 게시글 수 -->
+    <select id="countByAuthor" resultType="int">
+        SELECT COUNT(*)
+        FROM board b
+        JOIN users u ON b.user_id = u.user_id
+        WHERE u.email LIKE '%' || #{keyword} || '%'
+    </select>
+
+    <!-- INSERT -->
+    <insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.BoardRecord">
+        INSERT INTO board
+        (board_id, user_id, type, title, content, visibility, view_count, created_at, updated_at)
+        VALUES
+        (#{boardId}, #{userId}, #{type}, #{title}, #{content}, #{visibility},
+        #{viewCount}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <!-- UPDATE (PK 기준) -->
+    <update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.BoardRecord">
+        UPDATE board
+        SET
+            type = #{type},
+            title = #{title},
+            content = #{content},
+            visibility = #{visibility},
+            view_count = #{viewCount},
+            updated_at = #{updatedAt}
+        WHERE board_id = #{boardId}
+    </update>
+
+    <!-- 삭제 -->
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM board WHERE board_id = #{boardId}
+    </delete>
+
+</mapper>

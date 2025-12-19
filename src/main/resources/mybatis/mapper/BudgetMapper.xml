@@ -1,0 +1,154 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.BudgetMapper">
+
+	<resultMap id="BudgetMap" type="com.eggmoney.payv.infrastructure.mybatis.record.BudgetRecord">
+		<id property="budgetId" column="BUDGET_ID" />
+		<result property="ledgerId" column="LEDGER_ID" />
+		<result property="categoryId" column="CATEGORY_ID" />
+		<result property="yearMonth" column="YEAR_MONTH" />
+		<result property="limitAmount" column="LIMIT_AMOUNT" />
+		<result property="spentAmount" column="SPENT_AMOUNT" />
+		<result property="createdAt" column="CREATED_AT" />
+	</resultMap>
+
+	<!-- 상세 조회. by PK -->
+	<select id="selectById" parameterType="string" resultMap="BudgetMap">
+		SELECT 
+			BUDGET_ID, 
+			LEDGER_ID, 
+			CATEGORY_ID, 
+			YEAR_MONTH, 
+			LIMIT_AMOUNT, 
+			SPENT_AMOUNT,
+			CREATED_AT
+		FROM 
+			BUDGET
+		WHERE 
+			BUDGET_ID = #{id} AND 
+			ROWNUM = 1
+	</select>
+
+	<!-- 상세 조회. by (LEDGER, CATEGORY, YEAR_MONTH) -->
+	<select id="selectOne" resultMap="BudgetMap">
+		SELECT 
+			BUDGET_ID, 
+			LEDGER_ID, 
+			CATEGORY_ID, 
+			YEAR_MONTH, 
+			LIMIT_AMOUNT, 
+			SPENT_AMOUNT,
+			CREATED_AT
+		FROM 
+			BUDGET
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			CATEGORY_ID = #{categoryId} AND 
+			YEAR_MONTH = #{yearMonth} AND 
+			ROWNUM = 1
+	</select>
+
+	<select id="selectByLedger" resultMap="BudgetMap">
+		SELECT 
+			BUDGET_ID, 
+			LEDGER_ID, 
+			CATEGORY_ID, 
+			YEAR_MONTH, 
+			LIMIT_AMOUNT, 
+			SPENT_AMOUNT,
+			CREATED_AT
+		FROM 
+			BUDGET
+		WHERE 
+			LEDGER_ID = #{ledgerId}
+		ORDER BY 
+			YEAR_MONTH ASC, CATEGORY_ID ASC
+	</select>
+
+	<!-- 예산 존재 여부. -->
+	<select id="existsFor" resultType="int">
+		SELECT COUNT(1)
+		FROM BUDGET
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			CATEGORY_ID = #{categoryId} AND 
+			YEAR_MONTH = #{yearMonth}
+	</select>
+
+	<!-- 루트 카테고리의 하위 카테고리 중 월 예산 존재 여부.(깊이=2) -->
+	<select id="existsForAnyChild" resultType="int">
+		SELECT COUNT(1)
+		FROM BUDGET b
+		WHERE 
+			b.LEDGER_ID = #{ledgerId} AND 
+			b.YEAR_MONTH = #{yearMonth} AND 
+			b.CATEGORY_ID IN (
+				SELECT c.CATEGORY_ID
+				FROM CATEGORY c
+				WHERE 
+					c.LEDGER_ID = #{ledgerId} AND 
+					c.PARENT_ID = #{rootId} AND 
+					c.IS_DELETED = 'N'
+		)
+	</select>
+
+	<!-- 루트/자식 집계용: 카테고리 목록 + 월 -->
+	<select id="selectByCategoriesAndMonth" resultMap="BudgetMap">
+		SELECT 
+			BUDGET_ID, 
+			LEDGER_ID, 
+			CATEGORY_ID, 
+			YEAR_MONTH, 
+			LIMIT_AMOUNT, 
+			SPENT_AMOUNT,
+			CREATED_AT
+		FROM 
+			BUDGET
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			YEAR_MONTH = #{yearMonth} 
+			AND (
+	            <if test="categoryIds != null and categoryIds.size > 0">
+	                CATEGORY_ID IN
+	                <foreach collection="categoryIds" item="id" open="(" separator="," close=")">
+	                    #{id}
+	                </foreach>
+	            </if>
+	            <if test="categoryIds == null or categoryIds.size == 0">
+	                1 = 0
+	            </if>
+	        )
+	</select>
+
+	<insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.BudgetRecord">
+		INSERT INTO BUDGET (
+			BUDGET_ID, 
+			LEDGER_ID, 
+			CATEGORY_ID, 
+			YEAR_MONTH, 
+			LIMIT_AMOUNT, 
+			SPENT_AMOUNT
+		)
+		VALUES (
+			#{budgetId}, 
+			#{ledgerId}, 
+			#{categoryId}, 
+			#{yearMonth}, 
+			#{limitAmount, jdbcType=NUMERIC}, 
+			#{spentAmount, jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.BudgetRecord">
+		UPDATE BUDGET SET 
+			LEDGER_ID = #{ledgerId},
+			CATEGORY_ID = #{categoryId},
+			YEAR_MONTH = #{yearMonth},
+			LIMIT_AMOUNT = #{limitAmount, jdbcType=NUMERIC},
+			SPENT_AMOUNT = #{spentAmount, jdbcType=NUMERIC}
+		WHERE 
+			BUDGET_ID = #{budgetId}
+	</update>
+
+</mapper>

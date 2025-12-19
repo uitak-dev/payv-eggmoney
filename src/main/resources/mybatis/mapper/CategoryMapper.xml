@@ -1,0 +1,177 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.CategoryMapper">
+
+	<resultMap id="CategoryMap" type="com.eggmoney.payv.infrastructure.mybatis.record.CategoryRecord">
+		<id property="categoryId" column="CATEGORY_ID" />
+		<result property="ledgerId" column="LEDGER_ID" />
+		<result property="name" column="NAME" />
+		<result property="isSystemCategory" column="IS_SYSTEM_CATEGORY" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="sortOrder" column="SORT_ORDER" />
+		<result property="isDeleted" column="IS_DELETED" />
+	</resultMap>
+
+	<select id="selectById" parameterType="string" resultMap="CategoryMap">
+		SELECT 
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID, 
+			SORT_ORDER,
+			IS_DELETED
+		FROM 
+			CATEGORY
+		WHERE 
+			CATEGORY_ID = #{id} AND 
+			ROWNUM = 1
+	</select>
+
+	<select id="selectByLedgerAndName" resultMap="CategoryMap">
+		SELECT 
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID, 
+			SORT_ORDER, 
+			IS_DELETED
+		FROM 
+			CATEGORY
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			NAME = #{name} AND 
+			IS_DELETED = 'N' AND 
+			ROWNUM = 1
+	</select>
+
+	<select id="selectListByLedger" resultMap="CategoryMap">
+		SELECT 
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID, 
+			SORT_ORDER, 
+			IS_DELETED
+		FROM 
+			CATEGORY
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			IS_DELETED = 'N'
+		ORDER BY 
+			SORT_ORDER ASC, NAME ASC
+	</select>
+	
+	<select id="selectRootCategoryListByLedger" resultMap="CategoryMap">
+		SELECT 
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID, 
+			SORT_ORDER, 
+			IS_DELETED
+		FROM 
+			CATEGORY
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			PARENT_ID IS NULL AND
+			IS_DELETED = 'N'
+		ORDER BY 
+			SORT_ORDER ASC, NAME ASC
+	</select>
+	
+	<select id="selectSubCategoryListByLedgerAndParentCategory" resultMap="CategoryMap">
+		SELECT 
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID, 
+			SORT_ORDER, 
+			IS_DELETED
+		FROM 
+			CATEGORY
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			PARENT_ID = #{parentId} AND
+			IS_DELETED = 'N'
+		ORDER BY 
+			SORT_ORDER ASC, NAME ASC
+	</select>
+
+	<insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.CategoryRecord">
+		INSERT INTO CATEGORY (
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID, 
+			SORT_ORDER,
+			IS_DELETED
+		)
+		VALUES (
+			#{categoryId}, 
+			#{ledgerId}, 
+			#{name}, 
+			NVL(#{isSystemCategory}, 'N'), 
+			#{parentId, jdbcType=VARCHAR}, 
+			NVL(#{sortOrder}, 0),
+			NVL(#{isDeleted}, 'N')
+		)
+	</insert>
+
+	<update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.CategoryRecord">
+		UPDATE CATEGORY SET 
+			LEDGER_ID = #{ledgerId},
+			NAME = #{name},
+			IS_SYSTEM_CATEGORY = NVL(#{isSystemCategory}, 'N'),
+			PARENT_ID = #{parentId, jdbcType=VARCHAR},
+			SORT_ORDER = NVL(#{sortOrder}, 0),
+			IS_DELETED = NVL(#{isDeleted}, 'N')
+		WHERE 
+			CATEGORY_ID = #{categoryId}
+	</update>
+
+	<!-- 소프트 삭제: IS_DELETED='Y' -->
+	<update id="delete" parameterType="string">
+		UPDATE CATEGORY SET 
+			IS_DELETED = 'Y' 
+		WHERE 
+			CATEGORY_ID = #{id}
+	</update>
+
+	<!-- 자식 일괄 소프트 삭제 -->
+	<update id="deleteChildren">
+		UPDATE CATEGORY SET 
+			IS_DELETED = 'Y'
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			PARENT_ID = #{parentId} AND 
+			IS_DELETED = 'N'
+	</update>
+
+	<select id="selectSystemTemplatesOrdered" resultMap="CategoryMap">
+		SELECT 
+			CATEGORY_ID, 
+			LEDGER_ID, 
+			NAME, 
+			IS_SYSTEM_CATEGORY, 
+			PARENT_ID,
+			SORT_ORDER, 
+			IS_DELETED
+		FROM 
+			CATEGORY
+		WHERE 
+			IS_SYSTEM_CATEGORY = 'Y' AND 
+			LEDGER_ID = 'SYSTEM' AND 
+			IS_DELETED = 'N'
+		ORDER BY
+			CASE WHEN PARENT_ID IS NULL THEN 0 ELSE 1 END,
+			NVL(PARENT_ID, '0'),
+			SORT_ORDER ASC, NAME ASC
+	</select>
+	
+</mapper>

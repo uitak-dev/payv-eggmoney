@@ -1,0 +1,113 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eggmoney.payv.infrastructure.mybatis.mapper.AccountMapper">
+
+	<resultMap id="AccountMap" type="com.eggmoney.payv.infrastructure.mybatis.record.AccountRecord">
+		<id property="accountId" column="ACCOUNT_ID" />
+		<result property="ledgerId" column="LEDGER_ID" />
+		<result property="type" column="TYPE" />
+		<result property="name" column="NAME" />
+		<result property="currentBalance" column="CURRENT_BALANCE" />
+		<result property="archived" column="ARCHIVED" />
+		<result property="isDeleted" column="IS_DELETED" />
+		<result property="createdAt" column="CREATED_AT" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<select id="selectById" parameterType="string" resultMap="AccountMap">
+		SELECT 
+			ACCOUNT_ID, 
+			LEDGER_ID, 
+			TYPE, 
+			NAME, 
+			CURRENT_BALANCE, 
+			ARCHIVED,
+			IS_DELETED,
+			CREATED_AT
+		FROM 
+			ACCOUNT
+		WHERE 
+			ACCOUNT_ID = #{id}
+		AND ROWNUM = 1
+	</select>
+	
+	<select id="selectByLedgerAndName" resultMap="AccountMap">
+		SELECT 
+			ACCOUNT_ID, 
+			LEDGER_ID, 
+			TYPE, 
+			NAME, 
+			CURRENT_BALANCE, 
+			ARCHIVED,
+			IS_DELETED,
+			CREATED_AT
+		FROM 
+			ACCOUNT
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND 
+			NAME = #{name} AND
+			IS_DELETED = 'N' AND 
+			ROWNUM = 1
+	</select>
+	
+	<select id="selectListByLedger" parameterType="string" resultMap="AccountMap">
+		SELECT 
+			ACCOUNT_ID, 
+			LEDGER_ID, 
+			TYPE, 
+			NAME, 
+			CURRENT_BALANCE,
+			ARCHIVED,
+			IS_DELETED,
+			CREATED_AT
+		FROM 
+			ACCOUNT
+		WHERE 
+			LEDGER_ID = #{ledgerId} AND
+			IS_DELETED = 'N'
+		ORDER BY 
+			ARCHIVED ASC, ACCOUNT_ID DESC, NAME ASC
+	</select>
+	
+	<insert id="insert" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.AccountRecord">
+		INSERT INTO ACCOUNT (
+			ACCOUNT_ID, 
+			LEDGER_ID, 
+			TYPE, 
+			NAME, 
+			CURRENT_BALANCE, 
+			ARCHIVED,
+			IS_DELETED,
+			CREATED_AT
+		)
+		VALUES (
+			#{accountId}, 
+			#{ledgerId}, 
+			#{type}, 
+			#{name}, 
+			#{currentBalance}, 
+			NVL(#{archived}, 'N'), 
+			NVL(#{isDeleted}, 'N'), 
+			NVL(#{createdAt}, SYSTIMESTAMP)
+		)
+	</insert>
+
+	<update id="update" parameterType="com.eggmoney.payv.infrastructure.mybatis.record.AccountRecord">
+		UPDATE ACCOUNT SET 
+			LEDGER_ID = #{ledgerId},
+			TYPE = #{type},
+			NAME = #{name},
+			CURRENT_BALANCE = #{currentBalance},
+			IS_DELETED = NVL(#{isDeleted}, 'N'),
+			ARCHIVED = NVL(#{archived}, 'N')
+		WHERE 
+			ACCOUNT_ID = #{accountId}
+	</update>
+
+	<!-- 소프트 삭제: IS_DELETED='Y' -->
+	<update id="delete" parameterType="string">
+		UPDATE ACCOUNT SET 
+			IS_DELETED = 'Y' 
+		WHERE 
+			ACCOUNT_ID = #{id}
+	</update>
+</mapper>

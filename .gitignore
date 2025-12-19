@@ -1,0 +1,33 @@
+# Maven 빌드 산출물
+/target/
+
+# 로그 파일
+*.log
+
+# IDE 설정 파일
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse / STS
+.project
+.classpath
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# OS별 임시 파일
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+
+# 빌드 도구 캐시
+.gradle/
+build/
+
+# 테스트 리포트
+/test-output/

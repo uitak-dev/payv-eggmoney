@@ -1,0 +1,129 @@
+/* ledger.css */
+
+/* 기본 레이아웃 */
+.ledger-main {
+    padding: 20px;
+}
+
+/* 가계부 제목 */
+.ledger-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2C3E50;
+    margin-bottom: 20px;
+}
+
+/* 드롭다운 스타일 */
+.ledger-select {
+    margin-bottom: 15px;
+}
+
+.ledger-select label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #34495E;
+    margin-right: 10px;
+}
+
+.ledger-dropdown {
+    padding: 8px 12px;
+    border: 1px solid #BDC3C7;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    width: 200px;
+}
+
+.ledger-dropdown:focus {
+    border-color: #3498DB;
+    outline: none;
+}
+
+/* 새 가계부 버튼 */
+.new-ledger-btn .btn-create {
+    display: inline-block;
+    padding: 8px 14px;
+    background-color: #2980B9;
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.new-ledger-btn .btn-create:hover {
+    background-color: #1F618D;
+}
+
+/* 가계부 목록 테이블 */
+.ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ledger-table th, .ledger-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #D9D9D9;
+    text-align: left;
+    font-size: 16px;
+    color: #333;
+}
+
+.ledger-table thead {
+    background-color: #C5D3E8;
+    color: black;
+    font-weight: 600;
+}
+
+.ledger-table tbody tr:nth-child(even) {
+    background-color: #F9F9F9;
+}
+
+.ledger-table tbody tr:hover {
+    background-color: #EAEAEA;
+}
+
+/* '열기' 버튼 */
+.btn-open {
+    padding: 6px 12px;
+    background-color: #967E76;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn-open:hover {
+    background-color: #2980B9;
+}
+
+/* 자산 설정 버튼 */
+.btn-asset-settings {
+    padding: 6px 12px;
+    background-color: #F27272;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn-asset-settings:hover {
+    background-color: ##F2A0A0;
+}
+
+/* 예산 설정 버튼 */
+.btn-budget-settings {
+    padding: 6px 12px;
+    background-color: #F39C12;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn-budget-settings:hover {
+    background-color: #E67E22;
+}

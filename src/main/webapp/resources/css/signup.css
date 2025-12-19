@@ -1,0 +1,250 @@
+/**
+ * 에그머니 - 회원가입 페이지 스타일시트
+ * 
+ * @author 강기범
+ */
+
+/* ==========================================================================
+   기본 설정
+   ========================================================================== */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Malgun Gothic', '맑은고딕', sans-serif;
+	background-color: #F5F3E7;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	padding: 20px;
+}
+
+/* ==========================================================================
+   우상단 로그인 버튼
+   ========================================================================== */
+.login-button-top {
+	position: absolute;
+	top: 30px;
+	right: 30px;
+	background: #FF6B9D;
+	color: white;
+	padding: 12px 24px;
+	border: none;
+	border-radius: 25px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: none;
+	transition: all 0.3s ease;
+}
+
+.login-button-top:hover {
+	background: #E55A87;
+	transform: translateY(-2px);
+	color: white;
+	text-decoration: none;
+}
+
+/* ==========================================================================
+   메인 컨테이너
+   ========================================================================== */
+.signup-container {
+	text-align: center;
+	width: 100%;
+	max-width: 450px;
+	padding: 40px;
+}
+
+/* ==========================================================================
+   로고 영역 수정 (이미지 기반)
+   ========================================================================== */
+.logo-section {
+	margin-bottom: 50px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.character-icon {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.logo-icon {
+	width: auto;
+	height: 120px;
+	max-width: 300px;
+	object-fit: contain;
+}
+
+/* 기존 CSS 돈주머니 스타일 (이미지 사용 시 숨김) */
+.money-bags-icon {
+	display: none;
+}
+
+.logo-text {
+	display: none;
+}
+
+/* ==========================================================================
+   폼 스타일
+   ========================================================================== */
+.form-section {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	align-items: center;
+}
+
+.input-group {
+	width: 100%;
+	max-width: 320px;
+	position: relative;
+}
+
+.input-label {
+	display: block;
+	text-align: left;
+	font-size: 14px;
+	color: #666;
+	margin-bottom: 8px;
+	font-weight: 500;
+}
+
+.input-field {
+	width: 100%;
+	padding: 15px 20px;
+	border: none;
+	border-radius: 25px;
+	background: white;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	font-size: 16px;
+	outline: none;
+	transition: all 0.3s ease;
+}
+
+.input-field:focus {
+	box-shadow: 0 4px 12px rgba(255, 107, 157, 0.2);
+	transform: translateY(-1px);
+}
+
+.input-field.error {
+	box-shadow: 0 2px 8px rgba(214, 48, 49, 0.2);
+	border: 1px solid #d63031;
+}
+
+.input-field::placeholder {
+	color: #ccc;
+}
+
+.error-message {
+	color: #d63031;
+	font-size: 12px;
+	margin-top: 5px;
+	text-align: left;
+	display: block;
+}
+
+.password-hint {
+	font-size: 11px;
+	color: #999;
+	margin-top: 4px;
+	text-align: left;
+}
+
+/* ==========================================================================
+   회원가입 버튼
+   ========================================================================== */
+.signup-button {
+	width: 100%;
+	max-width: 320px;
+	padding: 15px;
+	background: linear-gradient(135deg, #FF6B9D 0%, #FF8FA3 100%);
+	color: white;
+	border: none;
+	border-radius: 25px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	margin-top: 15px;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+}
+
+.signup-button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+}
+
+/* ==========================================================================
+   메시지 알림
+   ========================================================================== */
+.alert {
+	padding: 12px 20px;
+	border-radius: 20px;
+	margin-bottom: 20px;
+	font-size: 14px;
+	font-weight: 500;
+	max-width: 320px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.alert-error {
+	background-color: #FFE6E6;
+	color: #D63031;
+	border: 1px solid #FFB3B3;
+}
+
+.alert-success {
+	background-color: #E6F7E6;
+	color: #00B894;
+	border: 1px solid #B3E6B3;
+}
+
+/* ==========================================================================
+   하단 링크
+   ========================================================================== */
+.login-links {
+	margin-top: 25px;
+}
+
+.login-links a {
+	color: #FF6B9D;
+	text-decoration: none;
+	font-weight: 500;
+	font-size: 14px;
+}
+
+.login-links a:hover {
+	text-decoration: underline;
+}
+
+/* ==========================================================================
+   반응형 디자인
+   ========================================================================== */
+@media ( max-width : 768px) {
+	.signup-container {
+		padding: 20px;
+	}
+	.login-button-top {
+		top: 20px;
+		right: 20px;
+		padding: 10px 20px;
+		font-size: 14px;
+	}
+	.logo-section {
+		margin-bottom: 35px;
+	}
+	.logo-icon {
+		height: 90px;
+		max-width: 250px;
+	}
+}

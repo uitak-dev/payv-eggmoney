@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/tx      http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+    <!-- 1) 컴포넌트 스캔: 도메인/애플리케이션/인프라 빈들 -->
+    <context:component-scan base-package="com.eggmoney.payv">
+        <!-- MVC(@Controller)는 servlet-context에서 스캔 -->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+
+
+    <!-- 2) 외부 설정 파일 로드 (JDBC/풀 설정) -->
+    <!--   src/main/resources/jdbc.properties 를 사용 -->
+    <context:property-placeholder location="classpath:jdbc.properties" ignore-unresolvable="true"/>
+
+
+    <!-- 3) HikariCP DataSource (Oracle 11g) -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+<!--        <property name="driverClassName" value="${jdbc.driverClassName:oracle.jdbc.OracleDriver}"/>-->
+        <property name="driverClassName" value="${jdbc.driverClassName:org.h2.Driver}"/>
+        <property name="jdbcUrl"         value="${jdbc.url}"/>
+        <property name="username"        value="${jdbc.username}"/>
+        <property name="password"        value="${jdbc.password}"/>
+
+        <!-- 풀 튜닝 값(필요시 조정) -->
+        <property name="maximumPoolSize" value="${hikari.maximumPoolSize:10}"/>
+        <property name="minimumIdle"     value="${hikari.minimumIdle:2}"/>
+        <property name="idleTimeout"     value="${hikari.idleTimeout:600000}"/>
+        <property name="connectionTimeout" value="${hikari.connectionTimeout:30000}"/>
+        <property name="connectionTestQuery" value="SELECT 1 FROM DUAL"/>
+    </bean>
+
+    <!-- 4) 트랜잭션 매니저 & @Transactional 활성화 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+    <!-- 5) MyBatis SqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+
+        <!-- 별도의 전역 설정을 쓰고 싶다면 mybatis-config.xml을 두세요. -->
+		<!-- <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/> -->
+
+        <!-- 도메인 패키지에 alias 적용(필요에 맞게 수정) -->
+        <property name="typeAliasesPackage" value="com.eggmoney.payv.domain"/>
+
+        <!-- 커스텀 타입핸들러 패키지 -->
+        <property name="typeHandlersPackage" value="com.eggmoney.payv.infrastructure.mybatis.typehandler"/>
+
+        <!-- Mapper XML 위치 -->
+        <property name="mapperLocations" value="classpath*:mybatis/mapper/*Mapper.xml"/>
+    </bean>
+
+    <!-- 6) Mapper 스캔 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.eggmoney.payv.infrastructure.mybatis.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    
+    <!-- 7) security-context.xml import -->
+	<import resource="classpath:spring/security-context.xml" />
+
+</beans>

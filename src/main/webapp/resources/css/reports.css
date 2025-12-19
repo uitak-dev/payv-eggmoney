@@ -1,0 +1,56 @@
+/* 탭 버튼 */
+.reports-container .tab-buttons { display:flex; gap:10px; margin-bottom:16px; }
+.reports-container .tab-btn {
+  display:inline-flex; align-items:center; padding:8px 16px; border:none;
+  background:#967E76; color:#fff; border-radius:6px; cursor:pointer;
+  font-weight:500; transition:background .2s ease;
+}
+.reports-container .tab-btn:hover { background:#7f6a61; }
+.reports-container .tab-btn.active { background:#5D5045; }
+
+/* 섹션 전환 */
+.reports-container .section { display:none; }
+.reports-container .section.active { display:block; }
+
+/* 툴바 (report 전용) */
+.toolbar {
+  display:flex; align-items:center; gap:10px; margin:12px 0 132x;
+  justify-content:space-between;
+}
+.toolbar-left { display:inline-flex; align-items:center; gap:8px; }
+
+/* 검색 폼 */
+.reports-container .search-form { display:inline-flex; align-items:center; gap:6px; }
+.reports-container .search-form input[type="month"],
+.reports-container .search-form input[type="number"],
+.reports-container .search-form select {
+  padding:6px 10px; border:1px solid #967E76; border-radius:6px; font-size:14px; background:#fff;
+}
+
+/* 버튼  */
+.btn {
+  display:inline-flex; align-items:center; padding:8px 14px; border-radius:6px;
+  border:1px solid #ddd; background:#fff; cursor:pointer; text-decoration:none; line-height:1;
+}
+.btn:hover { background:#f6f6f6; }
+
+.btn-primary { border:1px solid #8d786f; background:#967E76; color:#fff; }
+.btn-primary:hover { background:#7f6a61; }
+.btn-primary.outline { background:#fff; color:#5D5045; border:1px solid #967E76; }
+.btn-primary.outline:hover { background:#fff7f0; }
+
+/* 데이터 없음 */
+.reports-container .no-data {
+  padding:24px; text-align:center; color:#777; border:1px dashed #ccc; border-radius:8px;
+}
+
+/* /* 차트 영역 — 헤더/ASIDE 위로 뜨지 않게 z-index 낮춤 */
+.reports-container .chart-container {
+  width:100%; height:520px; margin-top:16px;
+  position:relative; z-index:0; overflow:hidden;
+} */
+
+/* 카드 */
+.reports-container .card {
+  background:#fafafa; border:1px solid #ddd; border-radius:6px; padding:12px 16px; margin-bottom:12px;
+}
